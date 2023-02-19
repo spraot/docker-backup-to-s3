@@ -9,10 +9,20 @@ BACKUP_NAME="day_$(date +%u)"
 [ "$(date +%u)" -eq 5 ] && BACKUP_NAME="week_$(date +%V)"
 [ "$(date +%d)" -eq 1 ] && BACKUP_NAME="month_$(date +%m)"
 
-tar -zcvf "$ARCHIVE" "$DATA_PATH"
+if [ -f "$ARCHIVE" ] ; then
+    rm "$ARCHIVE"
+fi
 
-aws s3 cp "$ARCHIVE" "$S3_PATH$BACKUP_NAME.tar.gz"
+ARGS=-zcf
+EXCLUDE_FILE=/app/data/excludes
+if [ -f "$EXCLUDE_FILE" ] ; then
+    ARGS="-X $EXCLUDE_FILE $ARGS"
+fi
 
-rm $ARCH
+tar $ARGS "$ARCHIVE" "$DATA_PATH"
+
+/usr/local/bin/aws s3 cp "$ARCHIVE" "$S3_PATH$BACKUP_NAME.tar.gz"
+
+rm $ARCHIVE
 
 echo "Job finished: $(date)"

@@ -4,18 +4,19 @@ ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 
 RUN apt-get update \
-    & apt-get -y upgrade
+    && apt-get -y upgrade
+
+RUN apt-get -y install \
+    cron \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
-ADD start.sh /start.sh
-RUN chmod +x /start.sh
+COPY put.sh start.sh ./
+RUN chmod +x *.sh
 
-ADD put.sh /put.sh
-RUN chmod +x /put.sh
-
-ENTRYPOINT ["/start.sh"]
+ENTRYPOINT ["./start.sh"]
 CMD [""]

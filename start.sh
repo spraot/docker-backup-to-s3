@@ -13,16 +13,18 @@ else
 fi
 
 if [[ "$1" == 'no-cron' ]]; then
-    exec /put.sh
+    exec ./put.sh
 else
     LOGFIFO='/var/log/cron.fifo'
     if [[ ! -e "$LOGFIFO" ]]; then
         mkfifo "$LOGFIFO"
     fi
     CRON_ENV="PARAMS='$PARAMS'"
+    CRON_ENV="$CRON_ENV\nAWS_ACCESS_KEY_ID='$AWS_ACCESS_KEY_ID'"
+    CRON_ENV="$CRON_ENV\nAWS_SECRET_ACCESS_KEY='$AWS_SECRET_ACCESS_KEY'"
     CRON_ENV="$CRON_ENV\nDATA_PATH='$DATA_PATH'"
     CRON_ENV="$CRON_ENV\nS3_PATH='$S3_PATH'"
-    echo -e "$CRON_ENV\n$CRON_SCHEDULE /put.sh > $LOGFIFO 2>&1" | crontab -
+    echo -e "$CRON_ENV\n$CRON_SCHEDULE $(pwd)/put.sh > $LOGFIFO 2>&1" | crontab -
     crontab -l
     cron
     tail -f "$LOGFIFO"
