@@ -25,7 +25,6 @@ else
     CRON_ENV="$CRON_ENV\nDATA_PATH='$DATA_PATH'"
     CRON_ENV="$CRON_ENV\nS3_PATH='$S3_PATH'"
     echo -e "$CRON_ENV\n$CRON_SCHEDULE $(pwd)/put.sh > $LOGFIFO 2>&1" | crontab -
-    crontab -l
     cron
     tail -f "$LOGFIFO"
 fi
