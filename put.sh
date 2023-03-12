@@ -4,6 +4,11 @@ set -e
 
 echo "Job started: $(date)"
 
+IFS=':' read -a DIRS <<< "$EXCLUDES"
+for I in ${!DIRS[@]}; do
+  DIRS[$I]="--exclude=$(echo "${DIRS[$I]}" | sed 's:/*$::')"
+done
+
 ARCHIVE=backup.tar.gz
 BACKUP_NAME="day_$(date +%u)"
 [ "$(date +%u)" -eq 5 ] && BACKUP_NAME="week_$(date +%V)"
@@ -19,7 +24,7 @@ if [ -f "$EXCLUDE_FILE" ] ; then
     ARGS="-X $EXCLUDE_FILE $ARGS"
 fi
 
-tar $ARGS "$ARCHIVE" "$DATA_PATH"
+tar "${DIRS[@]}" $ARGS "$ARCHIVE" "$DATA_PATH"
 
 /usr/local/bin/aws s3 cp "$ARCHIVE" "$S3_PATH$BACKUP_NAME.tar.gz"
 
