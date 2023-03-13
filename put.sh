@@ -24,9 +24,9 @@ if [ -f "$EXCLUDE_FILE" ] ; then
     ARGS="-X $EXCLUDE_FILE $ARGS"
 fi
 
-tar "${DIRS[@]}" $ARGS "$ARCHIVE" "$DATA_PATH" >/dev/null 2>&1
+tar "${DIRS[@]}" $ARGS "$ARCHIVE" "$DATA_PATH"
 
-/usr/local/bin/aws s3 cp "$ARCHIVE" "$S3_PATH$BACKUP_NAME.tar.gz"
+/usr/local/bin/aws s3 cp --no-progress "$ARCHIVE" "$S3_PATH$BACKUP_NAME.tar.gz"
 
 rm $ARCHIVE
 
