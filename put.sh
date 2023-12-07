@@ -24,7 +24,26 @@ if [ -f "$EXCLUDE_FILE" ] ; then
     ARGS="-X $EXCLUDE_FILE $ARGS"
 fi
 
-tar "${DIRS[@]}" $ARGS "$ARCHIVE" "$DATA_PATH"
+set +e
+for i in {1..5}; do
+  tar "${DIRS[@]}" $ARGS "$ARCHIVE" "$DATA_PATH"
+  exitcode=$?
+
+  if [ "$exitcode" == "0" ]; then
+      break
+  fi
+  if [ "$exitcode" != "1" ]; then
+      exit $exitcode
+  fi
+  if [ "$i" != "5" ]; then
+    echo "Retrying tar command due to file change error"
+    sleep 10
+  else
+    echo "tar command failed after 5 retries"
+    exit $exitcode
+  fi
+done
+set -e
 
 /usr/local/bin/aws s3 cp --no-progress "$ARCHIVE" "$S3_PATH$BACKUP_NAME.tar.gz"
 
